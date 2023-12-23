@@ -6,10 +6,10 @@ This repository provides a Python-based solution for real-time data visualizatio
 **Features**:
 * Connect to an LSL stream and visualize the data in real-time.
 * Adjustable parameters:
- * plot_duration: Set the duration of the plot window.
- * update_interval: Define the interval for updating the plot.
- * pull_interval: Specify the interval for pulling data from the LSL stream.
+    * plot_duration: Set the duration of the plot window.
+    * update_interval: Define the interval for updating the plot.
+    * pull_interval: Specify the interval for pulling data from the LSL stream.
 * Customizable stream inlet type:
- * Declare the type of the stream inlet as an argument of the LSLManagement class.
+    * Declare the type of the stream inlet as an argument of the LSLManagement class.
 * Flexible filtering options:
- * Modify the filtering parameters in the design_filters method to suit your requirements.
+    * Modify the filtering parameters in the design_filters method to suit your requirements.
