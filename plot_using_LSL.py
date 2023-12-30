@@ -1,4 +1,5 @@
 import time
+
 import numpy as np
 import pyqtgraph as pg
 from PyQt5 import QtCore, QtGui, QtWidgets
@@ -64,11 +65,12 @@ class LSLManagement:
                 self.sample_rate = int(self.inlet.info().nominal_srate())
                 self.channel_count = self.inlet.info().channel_count()
                 self.extract_channel_names()
-                self.design_filters(self.sample_rate * 0.5)
-                break
+                self.design_filters()
+                return self.inlet.info().name()
 
         if not streams:
             print('No devices found.')
+            return None
 
     def extract_channel_names(self):
         channel = self.inlet.info().desc().child("channels").child("channel")
@@ -113,19 +115,22 @@ class LSLManagement:
 
     def update_plot(self):
         try:
+            a = round(len(self.eeg_data[0]) / self.sample_rate)
+            x = np.linspace(a - self.plot_duration, a, self.plot_samples)
             plot_data = np.array(self.window_live)
             if np.sum(plot_data) != 0:
                 plot_data = signal.detrend(plot_data, axis=1)
                 plot_data = self.filter_data(plot_data)
                 for i, curve in enumerate(self.curves):
-                    curve.setData(y=plot_data[i, :])
+                    curve.setData(x=x, y=plot_data[i, :])
 
         except Exception as e:
             print(f"Error in update_plot: {str(e)}")
 
-    def design_filters(self, nyquist_freq, low_cut=0.5, high_cut=40):
-        output = signal.butter(N=5, Wn=[low_cut / nyquist_freq, high_cut / nyquist_freq], btype='bandpass', analog=False,
-                               output='ba')
+    def design_filters(self, low_cut=0.5, high_cut=40):
+        nyquist_freq = self.sample_rate * 0.5
+        output = signal.butter(N=5, Wn=[low_cut / nyquist_freq, high_cut / nyquist_freq], btype='bandpass',
+                               analog=False, output='ba')
         self.filters['bandpass'] = [output[0], output[1]]  # b, a
 
     def filter_data(self, data):
@@ -135,8 +140,11 @@ class LSLManagement:
 
 def main():
     obj = LSLManagement('EEG')  # specify the type of the stream
-    obj.search_device()
-    obj.connect_to_LSL()
+    device = obj.search_device()
+    if device:
+        obj.connect_to_LSL()
+    else:
+        return
 
     import sys
 
